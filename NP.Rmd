@@ -1,0 +1,211 @@
+---
+title: "Trabalho - Não Paramétrica"
+author: "Daniel de Amaral da Silva"
+date: "April 19, 2019"
+output:
+  prettydoc::html_pretty:
+    highlight: github
+    theme: architect
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Lendo o dataset
+```{r}
+dados = read.table(file = "csv np.csv", sep = ";", header = TRUE, dec = ",")
+```
+
+
+## 1. Apresente os dados básicos, estatísticas (porcentagem, média, mediana e desvio-padrão), tabelas e gráficos, das variáveis da forma mais informativa possível.
+
+```{r cars}
+library(pastecs)
+statistics <- stat.desc(dados)
+round(statistics, 2)
+```
+
+```{r pressure, echo=FALSE}
+##plot(pressure)
+```
+
+## 2. Analise as variáveis qualitativas em relação aos verdadeiros percentuais populacionais, verificando se estas estão equidistribuídas na população.
+
+
+```{r}
+# teste binomial atributo A
+
+binom.test(sum(dados$atributo.A), length(dados$atributo.A), 0.5)
+
+```
+
+> Através da análise do teste, concluimos que há evidências de que o Atributo A não seja equilibrado (proporção $\neq$ 0.5) na população, ao nível de significância de 5%. E obtemos um intervalo de Confiança para o mesmo.
+
+$$[0.5276484 ; 0.7244334]$$
+
+```{r}
+# teste binomial atributo B
+
+binom.test(sum(dados$atributo.B), length(dados$atributo.B), 0.5)
+```
+
+> Através da análise do teste, não descartamos a hipótese de que o Atributo A seja equilibrado (proporção = 0.5) na população, ao nível de significância de 5%. E obtemos um intervalo de Confiança para o mesmo.
+
+$$[0.4571875;0.6591640]$$
+
+## 3. Analise a relação entre as variáveis qualitativas.
+
+```{r}
+# verificaremos a hipótese de independência entre as variáveis
+tbl = table(dados$atributo.A, dados$atributo.B)
+chisq.test(tbl)
+```
+
+> Devido ao p-valor ser extremamente baixo e consequentemente rejeitarmos em todos os níveis de significância usuais (10%, 5%, 1%), concluimos que as variáveis não são independentes, ou seja, há uma relação entre as duas variáveis em estudo.
+
+## 4. Analise a medida 1 com e sem a presença do atributo A, verificando se há diferença nas medidas e/ou variabilidade destas, com e sem a presença deste atributo
+
+```{r}
+library(cowplot)
+library(ggplot2)
+library(jmuOutlier)
+
+
+qplot(Medida.1, data = dados, geom = 'density',xlab = "Medida 1", ylab = "Densidade", 
+      main = "Densidade da Medida 1")
+
+com_A = dados[dados$atributo.A == 1, ]
+plt1 = qplot(Medida.1, data = com_A, geom = 'density',xlab = "Medida 1", ylab = "Densidade")
+
+sem_A = dados[dados$atributo.A == 0, ]
+plt2 = qplot(Medida.1, data = sem_A, geom = 'density',xlab = "Medida 1", ylab = "Densidade")
+
+plot_grid(plt1, plt2, labels = c("Com atributo A", "Sem atributo A"))
+
+wilcox.test(com_A$Medida.1, sem_A$Medida.1)
+
+siegel.test(com_A$Medida.1, sem_A$Medida.1)
+```
+
+> Verficamos que pelo teste de Mann-Whitney-Wilcoxon o p-valor é extremamente pequeno (4.271e-06), portanto, há evidências de que os valores da Medida 1 com o a presença do atributo A tendem a exceder os valores da Medida 1 sem a presença do atributo A. Porém, pelo teste de Siegel-Tukey não descartamos a hipótese de que tenham a mesma mediana e variância.
+
+## 5. Analise a medida 2 com e sem a presença do atributo A, verificando se há diferença nas medidas e/ou variabilidade destas, com e sem a presença deste atributo
+
+```{r}
+library(cowplot)
+library(ggplot2)
+library(jmuOutlier)
+
+
+qplot(Medida.2, data = dados, geom = 'density',xlab = "Medida 2", ylab = "Densidade", 
+      main = "Densidade da Medida 2")
+
+com_A = dados[dados$atributo.A == 1, ]
+plt1 = qplot(Medida.2, data = com_A, geom = 'density',xlab = "Medida 2", ylab = "Densidade")
+
+sem_A = dados[dados$atributo.A == 0, ]
+plt2 = qplot(Medida.2, data = sem_A, geom = 'density',xlab = "Medida 2", ylab = "Densidade")
+
+plot_grid(plt1, plt2, labels = c("Com atributo A", "Sem atributo A"))
+
+wilcox.test(com_A$Medida.2, sem_A$Medida.2)
+
+siegel.test(com_A$Medida.2, sem_A$Medida.2)
+```
+
+> Verficamos que pelo teste de Mann-Whitney-Wilcoxon o p-valor é extremamente pequeno (6.025e-07), portanto, há evidências de que os valores da Medida 2 com o a presença do atributo A tendem a exceder os valores da Medida 2 sem a presença do atributo A. Porém, pelo teste de Siegel-Tukey não descartamos a hipótese de que tenham a mesma mediana e variância.
+
+## 6. Analise a medida 1 com e sem a presença do atributo B, verificando se há diferença nas medidas e/ou variabilidade destas, com e sem a presença deste atributo
+
+```{r}
+library(cowplot)
+library(ggplot2)
+library(jmuOutlier)
+
+
+qplot(Medida.1, data = dados, geom = 'density',xlab = "Medida 1", ylab = "Densidade", 
+      main = "Densidade da Medida 1")
+
+com_B = dados[dados$atributo.B == 1, ]
+plt1 = qplot(Medida.1, data = com_B, geom = 'density',xlab = "Medida 1", ylab = "Densidade")
+
+sem_B = dados[dados$atributo.B == 0, ]
+plt2 = qplot(Medida.1, data = sem_B, geom = 'density',xlab = "Medida 1", ylab = "Densidade")
+
+plot_grid(plt1, plt2, labels = c("Com atributo B", "Sem atributo B"))
+
+wilcox.test(com_B$Medida.1, sem_B$Medida.1)
+
+siegel.test(com_B$Medida.1, sem_B$Medida.1)
+```
+
+> Verficamos que pelo teste de Mann-Whitney-Wilcoxon o p-valor é extremamente pequeno (1.542e-05), portanto, há evidências de que os valores da Medida 1 com o a presença do atributo B tendem a exceder os valores da Medida 1 sem a presença do atributo B. Porém, pelo teste de Siegel-Tukey não descartamos a hipótese de que tenham a mesma mediana e variância.
+
+## 7. Analise a medida 2 com e sem a presença do atributo B, verificando se há diferença nas medidas e/ou variabilidade destas, com e sem a presença deste atributo
+
+```{r}
+library(cowplot)
+library(ggplot2)
+library(jmuOutlier)
+
+
+qplot(Medida.2, data = dados, geom = 'density',xlab = "Medida 2", ylab = "Densidade", 
+      main = "Densidade da Medida 2")
+
+com_B = dados[dados$atributo.B == 1, ]
+plt1 = qplot(Medida.2, data = com_B, geom = 'density',xlab = "Medida 2", ylab = "Densidade")
+
+sem_B = dados[dados$atributo.B == 0, ]
+plt2 = qplot(Medida.1, data = sem_B, geom = 'density',xlab = "Medida 2", ylab = "Densidade")
+
+plot_grid(plt1, plt2, labels = c("Com atributo B", "Sem atributo B"))
+
+wilcox.test(com_B$Medida.2, sem_B$Medida.2)
+
+siegel.test(com_B$Medida.2, sem_B$Medida.2)
+```
+
+> Verficamos que pelo teste de Mann-Whitney-Wilcoxon o p-valor é extremamente pequeno (9.261e-06), portanto, há evidências de que os valores da Medida 1 com o a presença do atributo B tendem a exceder os valores da Medida 1 sem a presença do atributo B. Porém, pelo teste de Siegel-Tukey não descartamos a hipótese de que tenham a mesma mediana e variância.
+
+## 8. Analise a influência na relação e/ou diferença entre as mediadas 1 e 2, com e sem a presença do atributo A.
+
+```{r}
+library(ggplot2)
+library(jmuOutlier)
+
+com_A = dados[dados$atributo.A == 1, ]
+plt1 = ggplot(com_A, aes(Medida.1, Medida.2))+geom_point()
+
+sem_A = dados[dados$atributo.A == 0, ]
+plt2 = ggplot(sem_A, aes(Medida.1, Medida.2))+geom_point()
+
+plot_grid(plt1, plt2, labels = c("Com atributo A", "Sem atributo A"))
+
+cor(com_A[,3], com_A[,4], method = 'spearman')
+
+cor(sem_A[,3], sem_A[,4], method = 'spearman')
+```
+
+> Com a ausência do atributo A, as relações entre as variáveis parecem se alterar, de modo que temos um "estreitamento na relação" e nos dando uma relação linear mais formada que com a presença do atributo A. Algo que é confirmado pela "melhora" na correlação de Spearman sem o atributo A (0.7780939) comparado a correlação de Spearman com o atributo A (0.750576).
+
+
+## 9. Analise a influência na relação e/ou diferença entre as mediadas 1 e 2, com e sem a presença do atributo B.
+
+```{r}
+library(ggplot2)
+library(jmuOutlier)
+
+com_B = dados[dados$atributo.B == 1, ]
+plt1 = ggplot(com_B, aes(Medida.1, Medida.2))+geom_point()
+
+sem_B = dados[dados$atributo.B == 0, ]
+plt2 = ggplot(sem_B, aes(Medida.1, Medida.2))+geom_point()
+
+plot_grid(plt1, plt2, labels = c("Com atributo B", "Sem atributo B"))
+
+cor(com_B[,3], com_B[,4], method = 'spearman')
+
+cor(sem_B[,3], sem_B[,4], method = 'spearman')
+```
+
+> Com a presença ou ausência do atributo B, as relações entre as variáveis não parecem se alterar, algo que é confirmado pela igualdade entre as correlações de Spearman (0.7380725 e 0.7369979).
